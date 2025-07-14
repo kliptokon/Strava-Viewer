@@ -1,0 +1,33 @@
+{
+  "name": "fastify-hello-world",
+  "version": "1.0.0",
+  "description": "A simple Hello World application using Fastify",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "@fastify/autoload": "^6.3.1",
+    "@fastify/cors": "^8.5.0",
+    "@fastify/jwt": "^9.1.0",
+    "@fastify/oauth2": "^8.1.2",
+    "@fastify/postgres": "^6.0.2",
+    "@fastify/redis": "^7.0.2",
+    "@fastify/sensible": "^6.0.3",
+    "dotenv": "^17.2.0",
+    "fastify": "^4.29.1",
+    "node-fetch": "^3.3.2",
+    "pg": "^8.16.3",
+    "redis": "^5.6.0",
+    "strava-v3": "^2.2.1"
+  },
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
+  "devDependencies": {
+    "eslint": "^9.31.0",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.6.2"
+  }
+}
