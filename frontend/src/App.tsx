@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import "./App.css";
-import { api } from "./services/api";
 import { stravaAuth } from "./services/stravaAuth";
 import { ActivityChart } from "./components/ActivityChart";
 import "./components/ActivityChart.css";
@@ -18,17 +17,42 @@ function App() {
   const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
+  const checkAuth = () => {
+    const authenticated = stravaAuth.isAuthenticated();
+    setIsAuthenticated(authenticated);
+    if (!authenticated) {
+      // Clear any existing auth errors when not authenticated
+      setError(null);
+    }
+  };
+
   useEffect(() => {
-    // Handle Strava OAuth callback
     const handleCallback = async () => {
       const params = new URLSearchParams(window.location.search);
       const code = params.get("code");
+      const error = params.get("error");
+      const errorDescription = params.get("error_description");
+
+      console.log("URL params:", {
+        code: code ? `${code.substring(0, 10)}...` : code,
+        error,
+        errorDescription,
+        fullUrl: window.location.href,
+      });
+
+      if (error) {
+        console.error("OAuth error:", error, errorDescription);
+        setError(`Authentication failed: ${error}`);
+        setLoading(false);
+        return;
+      }
 
       if (code) {
         try {
-          console.log("Handling Strava callback with code:", code);
+          setLoading(true);
+          setError(null);
           await stravaAuth.handleCallback(code);
-          setIsAuthenticated(true);
+          checkAuth();
           // Remove code from URL
           window.history.replaceState(
             {},
@@ -38,36 +62,23 @@ function App() {
         } catch (err) {
           console.error("Auth error:", err);
           setError("Authentication failed");
+          setIsAuthenticated(false);
+        } finally {
+          setLoading(false);
         }
+      } else {
+        setLoading(false);
       }
-    };
-
-    const checkAuth = () => {
-      setIsAuthenticated(stravaAuth.isAuthenticated());
     };
 
     handleCallback();
     checkAuth();
   }, []);
 
-  useEffect(() => {
-    const initializeApp = async () => {
-      try {
-        await api.get("/");
-        setLoading(false);
-      } catch (err) {
-        console.error("Connection error:", err);
-        setError("Server connection failed - some features may be limited");
-        setLoading(false);
-      }
-    };
-
-    initializeApp();
-  }, []);
-
   const handleLogout = () => {
     stravaAuth.logout();
-    setIsAuthenticated(false);
+    checkAuth();
+    setError(null);
   };
 
   const categories: Category[] = [
@@ -114,10 +125,20 @@ function App() {
     <div className="app">
       <header className="app-header">
         <div className="header-content">
-          <h1>VeloViewer Clone</h1>
+          <h1>
+            Velo<span>Viewer</span>
+          </h1>
           <div className="auth-buttons">
             {!isAuthenticated ? (
               <button onClick={() => stravaAuth.login()} className="strava-btn">
+                <svg
+                  width="24"
+                  height="24"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+                </svg>
                 Connect with Strava
               </button>
             ) : (
@@ -137,14 +158,16 @@ function App() {
         ) : (
           <>
             {isAuthenticated ? (
-              <>
-                <div>Debug: Authenticated, showing chart...</div>
-                <ActivityChart />
-              </>
+              <ActivityChart />
             ) : (
               <div className="welcome-message">
-                <h2>Welcome to VeloViewer Clone</h2>
-                <p>Connect with Strava to see your activity data</p>
+                <h2>
+                  Optimising personal performance and professional success
+                </h2>
+                <p>
+                  Connect with Strava to unlock detailed insights and
+                  visualizations of your activities
+                </p>
               </div>
             )}
           </>
