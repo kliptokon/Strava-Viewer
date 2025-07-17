@@ -1,4 +1,4 @@
-# VeloViewer Clone
+# Strava viewer
 
 A web application that integrates with Strava's API to display activity data and segment information, similar to VeloViewer.
 
