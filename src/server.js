@@ -32,9 +32,10 @@ fastify.get("/", async (request, reply) => {
 });
 
 // Handle Strava OAuth callback
-fastify.post("/api/strava/callback", async (request, reply) => {  try {
+fastify.post("/api/strava/callback", async (request, reply) => {
+  try {
     const { code } = request.body;
-    
+
     // Debug log the entire request body
     fastify.log.info("Received request body:", JSON.stringify(request.body));
     fastify.log.info("Raw request body:", request.body);
@@ -44,9 +45,11 @@ fastify.post("/api/strava/callback", async (request, reply) => {  try {
       return reply.status(400).send({ error: "Authorization code required" });
     }
 
-    if (typeof code !== 'string') {
+    if (typeof code !== "string") {
       fastify.log.error("Code is not a string:", typeof code, code);
-      return reply.status(400).send({ error: "Invalid authorization code format" });
+      return reply
+        .status(400)
+        .send({ error: "Invalid authorization code format" });
     }
 
     if (code.length < 10) {

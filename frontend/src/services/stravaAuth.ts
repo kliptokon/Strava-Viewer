@@ -7,7 +7,7 @@ export const stravaAuth = {
   login: () => {
     // Clear any previously stored code to avoid reuse
     sessionStorage.removeItem("processedCode");
-    
+
     const params = new URLSearchParams({
       client_id: String(STRAVA_CONFIG.clientId),
       redirect_uri: STRAVA_CONFIG.redirectUri,
@@ -45,7 +45,7 @@ export const stravaAuth = {
       console.log("Sending code to server:", {
         code: code ? `${code.substring(0, 20)}...` : code,
         fullCode: code,
-        codeLength: code ? code.length : 0
+        codeLength: code ? code.length : 0,
       });
 
       const response = await fetch(
