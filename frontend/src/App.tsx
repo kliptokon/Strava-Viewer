@@ -48,6 +48,15 @@ function App() {
       }
 
       if (code) {
+        // Check if this code has already been processed to avoid duplicate calls
+        const processedCode = sessionStorage.getItem("processedCode");
+        if (processedCode === code) {
+          console.log("Code already processed, skipping duplicate call");
+          setLoading(false);
+          checkAuth();
+          return;
+        }
+
         try {
           setLoading(true);
           setError(null);

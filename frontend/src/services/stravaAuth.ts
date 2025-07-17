@@ -1,10 +1,13 @@
 import { STRAVA_CONFIG } from "../config/strava";
 
+// Track ongoing token exchanges to prevent duplicates
+let tokenExchangeInProgress = false;
+
 export const stravaAuth = {
   login: () => {
     // Clear any previously stored code to avoid reuse
     sessionStorage.removeItem("processedCode");
-
+    
     const params = new URLSearchParams({
       client_id: String(STRAVA_CONFIG.clientId),
       redirect_uri: STRAVA_CONFIG.redirectUri,
@@ -19,15 +22,31 @@ export const stravaAuth = {
 
   handleCallback: async (code: string) => {
     try {
+      // Prevent multiple simultaneous token exchanges
+      if (tokenExchangeInProgress) {
+        console.log("Token exchange already in progress, waiting...");
+        return;
+      }
+
       // Check if we've already processed this code
       const processedCode = sessionStorage.getItem("processedCode");
       if (processedCode === code) {
-        console.log("Reusing existing token as code was already processed");
+        console.log("Code already processed, reusing existing token");
         const existingToken = localStorage.getItem("stravaTokenData");
         if (existingToken) {
           return JSON.parse(existingToken);
         }
       }
+
+      // Mark exchange as in progress
+      tokenExchangeInProgress = true;
+
+      // Debug log the code being sent
+      console.log("Sending code to server:", {
+        code: code ? `${code.substring(0, 20)}...` : code,
+        fullCode: code,
+        codeLength: code ? code.length : 0
+      });
 
       const response = await fetch(
         "http://localhost:3000/api/strava/callback",
@@ -68,6 +87,9 @@ export const stravaAuth = {
     } catch (error) {
       console.error("Error in handleCallback:", error);
       throw error;
+    } finally {
+      // Always clear the in-progress flag
+      tokenExchangeInProgress = false;
     }
   },
 
